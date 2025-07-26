@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Registration</title>
+    <!-- 暂时移除 CSS 引用，或确保 static/css/register.css 存在 -->
+    <!-- <link rel="stylesheet" href="/static/css/register.css" /> -->
+</head>
+<body>
+    <h2 class="header">Teacher Registration</h2>
+    <div class="center">
+        <form action="/register-post" method="POST">
+            <label for="name">Teacher name</label><br />
+            <input type="text" name="name" id="name" value="{{ current_name }}" maxlength="100"><br />
+            <label for="imageurl">Teacher image URL</label><br />
+            <input type="text" name="imageurl" id="imageurl" value="{{ current_imageurl }}" maxlength="200"><br />
+            <label for="profile">Brief profile</label><br />
+            <input type="text" name="profile" id="profile" value="{{ current_profile }}" maxlength="500"><br />
+            <label for="error">
+                <p style="color: red">{{ error }}</p>
+            </label>
+            <br />
+            <button type="submit" id="button1">Register</button>
+        </form>
+    </div>
+</body>
+</html>

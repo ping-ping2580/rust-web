@@ -1,0 +1,40 @@
+[package]
+name = "db"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-cors = "0.6.0-beta.10"
+actix-rt = "2.6.0"
+actix-web = "4.0.0-rc.2"
+chrono = { version = "0.4.41", features = ["serde"] }
+dotenv = "0.15.0"
+openssl = { version = "0.10.38", features = ["vendored"] }
+serde = { version = "1.0.132", features = ["derive"] }
+syn = { version = "1.0.109", features = ["derive", "parsing", "proc-macro", "full"] }
+sqlx = { version = "0.8.6", features = [
+    "runtime-tokio-native-tls",
+    "postgres",
+    "macros",
+    "chrono",
+    "json",
+    "time"
+] }
+js-sys = "0.3.56"
+wasm-bindgen = { version = "0.2.79", features = ["serde-serialize"] }
+web-sys = { version = "0.3.56", features = [
+    "Headers",
+    "Request",
+    "RequestInit",
+    "RequestMode",
+    "Response",
+    "Window",
+    "Document",
+    "Element",
+    "Node",
+    "console",
+] }
+console_error_panic_hook = { version = "0.1.6", optional = true }
+
+[[bin]]
+name = "teacher-service"

@@ -1,0 +1,53 @@
+[package]
+name = "wasm-client"
+version = "0.1.0"
+authors = ["Nf_eyebrows <15862132+nfeyebrows@user.noreply.gitee.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies]
+syn = { version = "1.0.109", features = ["derive", "parsing", "proc-macro", "full"] }
+sqlx = { version = "0.8.6", features = [
+    "runtime-tokio-native-tls",
+    "postgres",
+    "macros",
+    "chrono",
+    "json",
+    "time"
+] }
+serde = { version = "1.0", features = ["derive"] }
+wasm-bindgen = "0.2.100"
+serde-wasm-bindgen = "0.6"
+js-sys = "0.3.77"
+wasm-bindgen-futures = "0.4.29"
+web-sys = { version = "0.3.77", features = [
+    "Headers",
+    "Request",
+    "RequestInit",
+    "RequestMode",
+    "Response",
+    "Window",
+    "Document",
+    "Element",
+    "HtmlElement",
+    "Node",
+    "console",
+    "HtmlButtonElement",
+    "MouseEvent",
+    "Location",
+] }
+actix-web = "4.3"  # 确认是否需要
+chrono = { version = "0.4", features = ["serde"] }
+console_error_panic_hook = { version = "0.1.7", optional = true }
+wee_alloc = "0.4.5"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.34"
+
+[profile.release]
+opt-level = "s"

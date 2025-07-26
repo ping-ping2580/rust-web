@@ -1,0 +1,22 @@
+[package]
+name = "webapp"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-files = "0.6.0-beta.16"
+actix-web = "4.0.0-rc.2"
+awc = "3.0.0-beta.21"
+dotenv = "0.15.0"
+serde = {version = "1.0.136", features = ["derive"]}
+serde_json = "1.0.79"
+tera = "1.15.0"
+syn = { version = "1.0.109", features = ["derive", "parsing", "proc-macro", "full"] }
+sqlx = { version = "0.8.6", features = [
+    "runtime-tokio-native-tls",
+    "postgres",
+    "macros",
+    "chrono",
+    "json",
+    "time"
+] }

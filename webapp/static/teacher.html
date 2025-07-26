@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher List</title>
+</head>
+<body>
+    <h1>Teacher List</h1>
+    <ol>
+        {% for t in teachers %}
+        <li>
+            <h5>{{ t.name }}</h5>
+            <div>{{ t.profile }}</div>
+            <img src="{{ t.imageurl | default(value="") }}" alt="{{ t.name }}">
+        </li>
+        {% endfor %}
+    </ol>
+    <div style="margin-top: 20px">
+        <a href="/register">Register a teacher</a>
+    </div>
+    <p style="color: red">{{ error }}</p>
+</body>
+</html>
