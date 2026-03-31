@@ -7,7 +7,7 @@ use syn::VisRestricted;
 
 pub async fn get_all_teachers_db(pool: &PgPool) -> Result<Vec<Teacher>, MyError>
 {
-    let rows = sqlx::query!("SELECT id, name, picture_url, profile FROM teacher")
+    let rows = sqlx::query!("SELECT id as \"id!\", name, picture_url, profile FROM teacher")
     .fetch_all(pool)
     .await?;
 
@@ -31,7 +31,7 @@ pub async fn get_all_teachers_db(pool: &PgPool) -> Result<Vec<Teacher>, MyError>
 pub async fn get_teacher_details_db(pool: &PgPool, teacher_id: i32) -> Result<Teacher, MyError>
 {
     let row = sqlx::query!(
-        "SELECT id, name, picture_url, profile FROM teacher where id = $1",
+        "SELECT id as \"id!\", name, picture_url, profile FROM teacher where id = $1",
         teacher_id
     )
     .fetch_one(pool)
@@ -55,7 +55,7 @@ pub async fn post_new_teacher_db(
 {
     let row = sqlx::query!(
         "INSERT INTO teacher (name, picture_url, profile)
-        VALUES ($1, $2, $3) RETURNING id, name, picture_url, profile",
+        VALUES ($1, $2, $3) RETURNING id as \"id!\", name, picture_url, profile",
         new_teacher.name,
         new_teacher.picture_url,
         new_teacher.profile
@@ -78,7 +78,7 @@ pub async fn update_teacher_details_db(
 ) -> Result<Teacher, MyError>
 {
     let row = sqlx::query!(
-        "SELECT id, name, picture_url, profile FROM teacher where id = $1",
+        "SELECT id as \"id!\", name, picture_url, profile FROM teacher where id = $1",
         teacher_id
     )
     .fetch_one(pool)
@@ -107,7 +107,7 @@ pub async fn update_teacher_details_db(
 
     let update_row = sqlx::query!(
         "UPDATE teacher SET name = $1, picture_url = $2, profile = $3 WHERE id = $4
-        RETURNING id, name, picture_url, profile",
+        RETURNING id as \"id!\", name, picture_url, profile",
         temp.name,
         temp.picture_url,
         temp.profile,

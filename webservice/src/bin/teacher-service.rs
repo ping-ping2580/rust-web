@@ -1,11 +1,10 @@
 use actix_cors::Cors;
 use actix_web::{http, web, App, HttpServer};
-use sqlx::{database, ConnectOptions};
 use std::io;
 use std::sync::Mutex;
 use dotenv::dotenv;
 use std::env;
-use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
+use sqlx::postgres::PgPoolOptions;
 
 #[path = "../dbaccess/mod.rs"]
 mod dbaccess;
@@ -55,6 +54,7 @@ async fn main() -> io::Result<()>
         
 
         App::new()
+            .wrap(cors)
             .app_data(shared_data.clone())
             .app_data(web::JsonConfig::default().error_handler(|_err, _req|
             {
