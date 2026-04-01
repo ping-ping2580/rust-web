@@ -92,48 +92,35 @@ cargo run -p webapp --bin svr
 - `PUT /courses/{teacher_id}/{course_id}`
 - `DELETE /courses/{teacher_id}/{course_id}`
 
-## 当前已知问题
+## 本次修复说明
 
-### 1) `webservice` 编译失败（阻塞问题）
+### 1) `webservice` 已迁移为 Axum
 
-`teacher` 模型里 `id: i32`，但部分 SQLx 查询返回推断为 `Option<i32>`，存在类型不匹配，导致 `cargo check --workspace` 失败。
+- 路由、handler、错误响应已从 Actix Web 风格切换为 Axum 风格
+- 启动入口改为 `tokio + axum::serve`
+- CORS 改为 `tower-http` 配置
 
-涉及文件：
+### 2) teacher 相关 SQL 与类型映射已修复
 
-- `webservice/src/models/teacher.rs`
-- `webservice/src/dbaccess/teacher.rs`
+- `Teacher` 增加 `sqlx::FromRow`，查询统一使用 `query_as`
+- 修复 `id` 字段映射不一致导致的类型问题
+- 删除接口改为参数绑定 SQL（避免字符串拼接），并在删除 0 行时返回 NotFound
 
-### 2) SQLx 编译期依赖数据库
+### 3) `webapp` 字段命名与 API 对齐
 
-项目中使用了 `sqlx::query!` 宏。该宏默认会在编译期校验 SQL，需要数据库可访问，或提供离线元数据。
+- 前端表单字段统一为 `image_url`
+- 调用 `webservice` 时映射为后端字段 `picture_url`
+- 增加对 API 错误响应 `error_message` 的解析与页面回显
 
-如果数据库不可访问，编译时会出现类似：
+### 4) 编译状态
 
-```text
-error communicating with database
-```
-
-### 3) `webapp` 依赖 `HOST_PORT`
-
-`webapp/src/bin/svr.rs` 会读取 `HOST_PORT`。未设置时启动会直接报错退出。
-
-### 4) wasm-client 的 Node.js 版本兼容问题
-
-在 `wasm-client/www` 使用较旧 Webpack 构建时，Node.js 22 可能出现 OpenSSL 相关错误：
-
-```text
-digital envelope routines::unsupported
-```
-
-可选处理方式：
-
-- 使用较低 Node LTS（如 Node 18/20）
-- 或升级 webpack 配置与相关依赖
+- `cargo check --workspace` 已可通过
+- 当前仍有部分 warnings（主要在 `wasm-client`），不影响本次 fix
 
 ## 常用命令
 
 ```bash
-# 检查整个 workspace（当前会因 webservice 问题失败）
+# 检查整个 workspace
 cargo check --workspace
 
 # 单独检查可通过的包
@@ -143,7 +130,7 @@ cargo check -p wasm-client
 
 ## 后续建议
 
-- 先修复 `teacher.id` 类型与 SQL 查询映射，确保 `webservice` 可编译可运行
+- 继续清理 `wasm-client` 的 warnings（unused import / deprecated API）
 - 为数据库补充建表 SQL / migration
 - 增加统一启动文档（`make`/`just`/脚本）
 - 为关键 handler 和 dbaccess 增加集成测试

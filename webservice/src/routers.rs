@@ -1,31 +1,32 @@
+use std::sync::Arc;
+
+use axum::{
+    routing::{get, post},
+    Router,
+};
+
 use crate::handlers::{course::*, general::*, teacher::*};
-use actix_web::web;
+use crate::state::AppState;
 
-pub fn general_routes(cfg: &mut web::ServiceConfig)
-{
-    cfg.route("/health",web::get().to(health_check_handler));
-}
-
-pub fn course_route(cfg: &mut web::ServiceConfig)
-{
-    cfg.service(
-     web::scope("/courses")
-    .route("/",web::post().to(post_new_course))  
-    .route("/{teacher_id}", web::get().to(get_courses_for_teacher))
-    .route("/{teacher_id}/{course_id}",web::get().to(get_course_detail))
-    .route("/{teacher_id}/{course_id}",web::delete().to(delete_course))
-    .route("/{teacher_id}/{course_id}",web::put().to(update_course_details)))
-    ;
-}
-
-
-pub fn teacher_routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(
-        web::scope("/teachers")
-           .route("/", web::post().to(post_new_teacher))
-           .route("/", web::get().to(get_all_teachers))
-           .route("/{teacher_id}", web::get().to(get_teacher_details))
-           .route("/{teacher_id}", web::put().to(update_teacher_details))
-           .route("/{teacher_id}", web::delete().to(delete_teacher)))
-           ;
+pub fn app_router(state: Arc<AppState>) -> Router {
+    Router::new()
+        .route("/health", get(health_check_handler))
+        .route("/courses", post(post_new_course))
+        .route("/courses/", post(post_new_course))
+        .route("/courses/{teacher_id}", get(get_courses_for_teacher))
+        .route(
+            "/courses/{teacher_id}/{course_id}",
+            get(get_course_detail)
+                .delete(delete_course)
+                .put(update_course_details),
+        )
+        .route("/teachers", post(post_new_teacher).get(get_all_teachers))
+        .route("/teachers/", post(post_new_teacher).get(get_all_teachers))
+        .route(
+            "/teachers/{teacher_id}",
+            get(get_teacher_details)
+                .put(update_teacher_details)
+                .delete(delete_teacher),
+        )
+        .with_state(state)
 }

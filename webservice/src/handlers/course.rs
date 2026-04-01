@@ -1,67 +1,69 @@
-use crate::state::AppState;
-use crate::errors::MyError;
 use crate::dbaccess::course::*;
-use actix_web::{web, HttpResponse};
+use crate::errors::MyError;
+use crate::state::AppState;
+use axum::{
+    extract::{Path, State},
+    Json,
+};
+use std::sync::Arc;
 
 use crate::models::course::{CreateCourse, Course, UpdateCourse};
 
 pub async fn post_new_course(
-    new_course: web::Json<CreateCourse>,
-    app_state: web::Data<AppState>,
-) -> Result<HttpResponse, MyError>
+    State(app_state): State<Arc<AppState>>,
+    Json(new_course): Json<CreateCourse>,
+) -> Result<Json<Course>, MyError>
 {
-    post_new_course_db(&app_state.db, new_course.try_into()?)
+    post_new_course_db(&app_state.db, Json(new_course).try_into()?)
     .await
-    .map(|course| HttpResponse::Ok().json(course))
+    .map(Json)
 }
 
 pub async fn get_courses_for_teacher(
-    app_state: web::Data<AppState>,
-    params: web::Path<i32>,
-) -> Result<HttpResponse,MyError>
+    State(app_state): State<Arc<AppState>>,
+    Path(teacher_id): Path<i32>,
+) -> Result<Json<Vec<Course>>,MyError>
 {
-    // let teacher_id = i32::try_from(params.0).unwrap();
-    let teacher_id = params.into_inner();
     get_courses_for_teacher_db(&app_state.db, teacher_id)
         .await
-        .map(|courses| HttpResponse::Ok().json(courses))
+        .map(Json)
     
 }
 
 pub async fn get_course_detail(
-    app_state: web::Data<AppState>,
-    params: web::Path<(i32, i32)>,
-    // web::Path((teacher_id, course_id)): web::Path<(i32, i32)>,
-) -> Result<HttpResponse,MyError>
+    State(app_state): State<Arc<AppState>>,
+    Path((teacher_id, course_id)): Path<(i32, i32)>,
+) -> Result<Json<Course>,MyError>
 {
-    let (teacher_id, course_id) = params.into_inner();
     get_course_details_db(&app_state.db, teacher_id, course_id)
     .await
-    .map(|course| HttpResponse::Ok().json(course))
+    .map(Json)
 }
 
 pub async fn delete_course(
-    app_state: web::Data<AppState>,
-    params: web::Path<(i32, i32)>,
-) -> Result<HttpResponse,MyError>
+    State(app_state): State<Arc<AppState>>,
+    Path((teacher_id, course_id)): Path<(i32, i32)>,
+) -> Result<Json<String>,MyError>
 {
-    let (teacher_id, course_id) = params.into_inner();
     delete_course_db(&app_state.db, teacher_id, course_id)
     .await
-    .map(|resp| HttpResponse::Ok().json(resp))
+    .map(Json)
 }
 
 pub async fn update_course_details( 
-    app_state: web::Data<AppState>,
-    update_course: web::Json<UpdateCourse>,
-    params: web::Path<(i32, i32)>,
-) -> Result<HttpResponse,MyError>
+    State(app_state): State<Arc<AppState>>,
+    Path((teacher_id, course_id)): Path<(i32, i32)>,
+    Json(update_course): Json<UpdateCourse>,
+) -> Result<Json<Course>,MyError>
 {
-    // update_course实现的是from 所以加into
-    let (teacher_id, course_id) = params.into_inner();
-    update_course_details_db(&app_state.db, teacher_id, course_id, update_course.into())
+    update_course_details_db(
+        &app_state.db,
+        teacher_id,
+        course_id,
+        Json(update_course).into(),
+    )
     .await
-    .map(|course| HttpResponse::Ok().json(course))
+    .map(Json)
 }
 
 #[cfg(test)]
@@ -251,4 +253,3 @@ mod tests
         }
     }
 } 
-

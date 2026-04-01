@@ -1,10 +1,10 @@
-use actix_cors::Cors;
-use actix_web::{http, web, App, HttpServer};
+use axum::http::{header, Method};
 use std::io;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use dotenv::dotenv;
 use std::env;
 use sqlx::postgres::PgPoolOptions;
+use tower_http::cors::CorsLayer;
 
 #[path = "../dbaccess/mod.rs"]
 mod dbaccess;
@@ -23,46 +23,29 @@ mod state;
 use routers::*;
 use state::AppState;
 
-use crate::errors::MyError;
-
-#[actix_rt::main]
+#[tokio::main]
 async fn main() -> io::Result<()>
 {
     dotenv().ok(); 
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set.");
     let db_pool = PgPoolOptions::new().connect(&database_url).await.unwrap();
-    let shared_data = web::Data::new(AppState
+    let shared_state = Arc::new(AppState
     {
         health_check_response: "I'm OK.".to_string(),
         visit_count: Mutex::new(0),
         db: db_pool,
     });
 
-    let app = move || {
+    let cors = CorsLayer::new()
+        .allow_origin("http://localhost:8080".parse::<header::HeaderValue>().unwrap())
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_headers([header::AUTHORIZATION, header::ACCEPT, header::CONTENT_TYPE])
+        .max_age(std::time::Duration::from_secs(3600));
 
-        let cors = Cors::default()
-            .allowed_origin("http://localhost:8080/")
-            .allowed_origin_fn(|origin, _req_head|
-            {
-                origin.as_bytes().starts_with(b"http://localhost")
-            })
-            .allowed_methods(vec!["GET", "POST", "DELETE"])
-            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
-            .allowed_header(http::header::CONTENT_TYPE)
-            .max_age(3600);
-        
-
-        App::new()
-            .wrap(cors)
-            .app_data(shared_data.clone())
-            .app_data(web::JsonConfig::default().error_handler(|_err, _req|
-            {
-                MyError::InvalidInput("Please provide valid Json input".to_string()).into()
-            }))
-            .configure(general_routes)
-            .configure(course_route)
-            .configure(teacher_routes)
-    };
-    HttpServer::new(app).bind("127.0.0.1:3000")?.run().await
+    let app = app_router(shared_state).layer(cors);
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
+    axum::serve(listener, app)
+        .await
+        .map_err(io::Error::other)
 }

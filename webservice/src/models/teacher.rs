@@ -1,7 +1,7 @@
-use actix_web::web;
+use axum::Json;
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone, sqlx::FromRow)]
 pub struct Teacher {
     pub id: i32,
     pub name: Option<String>,
@@ -25,9 +25,9 @@ pub struct UpdateTeacher
     pub profile: Option<String>,
 }
 
-impl From<web::Json<CreateTeacher>> for CreateTeacher 
+impl From<Json<CreateTeacher>> for CreateTeacher 
 {
-    fn from(new_teacher: web::Json<CreateTeacher>) -> Self
+    fn from(new_teacher: Json<CreateTeacher>) -> Self
     {
         CreateTeacher
         {
@@ -38,9 +38,9 @@ impl From<web::Json<CreateTeacher>> for CreateTeacher
     }
 }
 
-impl From<web::Json<UpdateTeacher>> for UpdateTeacher
+impl From<Json<UpdateTeacher>> for UpdateTeacher
 {
-    fn from(update_teacher: web::Json<UpdateTeacher>) -> Self
+    fn from(update_teacher: Json<UpdateTeacher>) -> Self
     {
         UpdateTeacher
         {
@@ -50,5 +50,4 @@ impl From<web::Json<UpdateTeacher>> for UpdateTeacher
         }
     }
 }
-
 

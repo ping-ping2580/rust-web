@@ -1,10 +1,8 @@
 use crate::errors::MyError;
 use crate::models::course::{Course, UpdateCourse};
-use chrono::DateTime;
 use sqlx::postgres::PgPool;
 use sqlx::query_as;
 // use sqlx::FromRow;
-use sqlx::types::time::OffsetDateTime; // 仅用于绑定，保持兼容
 
 pub async fn get_courses_for_teacher_db(pool: &PgPool, teacher_id: i32) -> Result<Vec<Course>, MyError> {
     let rows: Vec<Course> = query_as(

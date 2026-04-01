@@ -4,7 +4,7 @@
 // pub struct TeacherRegisterForm
 // {
 //     pub name: String,
-//     pub imageurl: String,
+//     pub image_url: String,
 //     pub profile: String,
 // }
 
@@ -14,7 +14,7 @@
 //     pub id: i32,
 //     pub name: String,
 //     #[serde(rename = "picture_url")]
-//     pub imageurl: String,
+//     pub image_url: String,
 //     pub profile: String,
 // }
 
@@ -27,7 +27,7 @@ pub struct TeacherResponse {
     pub id: i32,
     pub name: String,
     #[serde(rename = "picture_url")]
-    pub imageurl: Option<String>, // 改为可选字段
+    pub image_url: Option<String>, // 改为可选字段
     #[serde(rename = "profile")]
     pub profile: String,
 }
@@ -35,6 +35,6 @@ pub struct TeacherResponse {
 #[derive(Deserialize, Serialize)]
 pub struct TeacherRegisterForm {
     pub name: String,
-    pub imageurl: String,
+    pub image_url: String,
     pub profile: String,
 }

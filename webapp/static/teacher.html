@@ -11,7 +11,7 @@
         <li>
             <h5>{{ t.name }}</h5>
             <div>{{ t.profile }}</div>
-            <img src="{{ t.imageurl | default(value="") }}" alt="{{ t.name }}">
+            <img src="{{ t.image_url | default(value="") }}" alt="{{ t.name }}">
         </li>
         {% endfor %}
     </ol>

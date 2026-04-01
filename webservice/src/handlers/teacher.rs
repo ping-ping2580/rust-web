@@ -1,67 +1,65 @@
-use std::panic::panic_any;
-use sqlx::postgres::PgConnectOptions;
 use crate::dbaccess::teacher::*;
 use crate::errors::MyError;
 use crate::models::teacher::{CreateTeacher, UpdateTeacher};
 use crate::state::AppState;
-
-use actix_web::{web, App, HttpResponse};
+use axum::{
+    extract::{Path, State},
+    Json,
+};
+use std::sync::Arc;
 
 pub async fn get_all_teachers(
-    app_state: web::Data<AppState>
-) -> Result<HttpResponse, MyError>
+    State(app_state): State<Arc<AppState>>
+) -> Result<Json<Vec<crate::models::teacher::Teacher>>, MyError>
 {
     get_all_teachers_db(&app_state.db)
     .await
-    .map(|teachers| HttpResponse::Ok().json(teachers))
+    .map(Json)
 }
 
 pub async fn get_teacher_details(
-    app_state: web::Data<AppState>,
-    params: web::Path<i32>,
-) -> Result<HttpResponse, MyError>
+    State(app_state): State<Arc<AppState>>,
+    Path(teacher_id): Path<i32>,
+) -> Result<Json<crate::models::teacher::Teacher>, MyError>
 {
-    let teacher_id = params.into_inner();
     get_teacher_details_db(&app_state.db, teacher_id)
     .await
-    .map(|teacher| HttpResponse::Ok().json(teacher))
+    .map(Json)
 }
 
 pub async fn post_new_teacher(
-    new_teacher: web::Json<CreateTeacher>,
-    app_state: web::Data<AppState>,
-) -> Result<HttpResponse, MyError>
+    State(app_state): State<Arc<AppState>>,
+    Json(new_teacher): Json<CreateTeacher>,
+) -> Result<Json<crate::models::teacher::Teacher>, MyError>
 {
-    post_new_teacher_db(&app_state.db, CreateTeacher::from(new_teacher))
+    post_new_teacher_db(&app_state.db, CreateTeacher::from(Json(new_teacher)))
     .await
-    .map(|teacher| HttpResponse::Ok().json(teacher))
+    .map(Json)
 }
 
 pub async fn update_teacher_details(
-    app_state: web::Data<AppState>,
-    params: web::Path<i32>,
-    update_teacher: web::Json<UpdateTeacher>,
-) -> Result<HttpResponse, MyError>
+    State(app_state): State<Arc<AppState>>,
+    Path(teacher_id): Path<i32>,
+    Json(update_teacher): Json<UpdateTeacher>,
+) -> Result<Json<crate::models::teacher::Teacher>, MyError>
 {
-    let teacher_id = params.into_inner();
     update_teacher_details_db(
         &app_state.db,
         teacher_id,
-        UpdateTeacher::from(update_teacher),
+        UpdateTeacher::from(Json(update_teacher)),
     )
     .await
-    .map(|teacher| HttpResponse::Ok().json(teacher))
+    .map(Json)
 }
 
 pub async fn delete_teacher(
-    app_state: web::Data<AppState>,
-    params: web::Path<i32>,
-) -> Result<HttpResponse, MyError>
+    State(app_state): State<Arc<AppState>>,
+    Path(teacher_id): Path<i32>,
+) -> Result<Json<String>, MyError>
 {
-    let teacher_id = params.into_inner();
     delete_teacher_db(&app_state.db, teacher_id)
         .await
-        .map(|teacher| HttpResponse::Ok().json(teacher))
+        .map(Json)
 }
 
 #[cfg(test)]

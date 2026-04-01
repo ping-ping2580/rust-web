@@ -1,5 +1,5 @@
-use crate::{dbaccess::teacher, errors::MyError};
-use actix_web::web;
+use crate::errors::MyError;
+use axum::Json;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
@@ -34,11 +34,11 @@ pub struct CreateCourse {
     pub level: Option<String>,
 }
 
-impl TryFrom<web::Json<CreateCourse>> for Course {
+impl TryFrom<Json<CreateCourse>> for Course {
     type Error = MyError;
 
-    fn try_from(course_json: web::Json<CreateCourse>) -> Result<Self, Self::Error> {
-        let create_course = course_json.into_inner();
+    fn try_from(course_json: Json<CreateCourse>) -> Result<Self, Self::Error> {
+        let create_course = course_json.0;
         Ok(Course {
             teacher_id: create_course.teacher_id,
             id: Some(0),
@@ -55,9 +55,9 @@ impl TryFrom<web::Json<CreateCourse>> for Course {
     }
 }
 
-impl TryFrom<web::Json<CreateCourse>> for CreateCourse {
+impl TryFrom<Json<CreateCourse>> for CreateCourse {
     type Error = MyError;
-    fn try_from(course: web::Json<CreateCourse>) -> Result<Self, Self::Error> {
+    fn try_from(course: Json<CreateCourse>) -> Result<Self, Self::Error> {
         Ok(CreateCourse {
             teacher_id: course.teacher_id,
             name: course.name.clone(),
@@ -84,8 +84,8 @@ pub struct UpdateCourse {
     pub level: Option<String>,
 }
 
-impl From<web::Json<UpdateCourse>> for UpdateCourse {
-    fn from(course: web::Json<UpdateCourse>) -> Self {
+impl From<Json<UpdateCourse>> for UpdateCourse {
+    fn from(course: Json<UpdateCourse>) -> Self {
         UpdateCourse {
             name: course.name.clone(),
             description: course.description.clone(),
